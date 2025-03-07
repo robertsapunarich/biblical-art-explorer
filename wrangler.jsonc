@@ -1,0 +1,47 @@
+// wrangler.jsonc
+{
+    "name": "biblical-art-explorer",
+    "main": "src/index.ts",
+    "compatibility_date": "2025-02-11",
+    "compatibility_flags": ["nodejs_compat"],
+    "observability": {
+      "enabled": true,
+      "head_sampling_rate": 1
+    },
+
+    // Durable Objects for Agent
+    "durable_objects": {
+      "bindings": [
+        {
+          "name": "ART_HISTORY_AGENT",
+          "class_name": "ArtHistoryAgent"
+        }
+      ]
+    },
+
+    // Migrations for Durable Objects
+    "migrations": [
+      {
+        "tag": "v1",
+        "new_sqlite_classes": ["ArtHistoryAgent"]
+      }
+    ],
+
+    // AI for processing
+    "ai": {
+      "binding": "AI"
+    },
+
+    // Browser Rendering API
+    "browser": [
+      {
+        "binding": "BROWSER"
+      }
+    ],
+
+    // Static assets for frontend
+    "assets": {
+      "directory": "./public",
+      "binding": "ASSETS"
+    }
+  }

@@ -1,0 +1,372 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Biblical Art Explorer</title>
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css"
+            rel="stylesheet"
+        />
+        <style>
+            .art-card {
+                transition: transform 0.3s ease;
+            }
+            .art-card:hover {
+                transform: scale(1.02);
+            }
+            .era-section {
+                scroll-margin-top: 2rem;
+            }
+        </style>
+    </head>
+    <body class="bg-gray-100 min-h-screen">
+        <header class="bg-blue-900 text-white p-6 shadow-md">
+            <div
+                class="container mx-auto flex flex-col md:flex-row justify-between items-center"
+            >
+                <h1 class="text-3xl font-serif font-bold mb-4 md:mb-0">
+                    Biblical Art Explorer
+                </h1>
+                <p class="text-blue-200 italic font-serif">
+                    Understanding Sacred Narratives Through Art History
+                </p>
+            </div>
+        </header>
+
+        <main class="container mx-auto py-8 px-4">
+            <section class="mb-12 max-w-3xl mx-auto text-center">
+                <h2 class="text-2xl font-serif mb-6">
+                    Explore Biblical Narratives in Art
+                </h2>
+                <p class="text-gray-700 mb-8">
+                    Enter a biblical narrative, character, or scene to discover
+                    how artists across different eras have depicted it.
+                </p>
+
+                <form
+                    id="query-form"
+                    class="flex flex-col md:flex-row gap-4 justify-center"
+                >
+                    <input
+                        type="text"
+                        id="query-input"
+                        placeholder="e.g., The Last Supper, Noah's Ark, Crucifixion..."
+                        class="flex-grow py-3 px-4 rounded-lg border-2 border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+                        required
+                    />
+                    <button
+                        type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200"
+                    >
+                        Explore
+                    </button>
+                </form>
+            </section>
+
+            <div
+                id="loading"
+                class="hidden flex-col items-center justify-center py-12"
+            >
+                <div
+                    class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-4"
+                ></div>
+                <p class="text-gray-600 italic">
+                    Searching for artistic depictions...
+                </p>
+            </div>
+
+            <section id="results-container" class="hidden">
+                <div
+                    class="mb-8 p-6 bg-blue-50 rounded-lg border border-blue-200"
+                >
+                    <h2
+                        id="narrative-title"
+                        class="text-2xl font-serif mb-3 text-blue-800"
+                    ></h2>
+                    <div
+                        id="narrative-description"
+                        class="text-gray-700 prose max-w-none"
+                    ></div>
+                </div>
+
+                <div
+                    id="era-navigation"
+                    class="mb-8 flex flex-wrap gap-2 justify-center sticky top-0 bg-white p-4 rounded-md shadow-md z-10"
+                ></div>
+
+                <div id="artworks-container"></div>
+            </section>
+        </main>
+
+        <footer class="bg-gray-800 text-white py-6 mt-12">
+            <div class="container mx-auto px-4 text-center">
+                <p>© 2025 Biblical Art Explorer</p>
+                <p class="text-gray-400 text-sm mt-2">
+                    Powered by Cloudflare AI and Agents
+                </p>
+            </div>
+        </footer>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const queryForm = document.getElementById('query-form');
+                const queryInput = document.getElementById('query-input');
+                const loadingElement = document.getElementById('loading');
+                const resultsContainer =
+                    document.getElementById('results-container');
+                const narrativeTitle =
+                    document.getElementById('narrative-title');
+                const narrativeDescription = document.getElementById(
+                    'narrative-description',
+                );
+                const eraNavigation = document.getElementById('era-navigation');
+                const artworksContainer =
+                    document.getElementById('artworks-container');
+
+                queryForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const query = queryInput.value.trim();
+                    if (!query) return;
+
+                    // Show loading, hide results
+                    loadingElement.classList.remove('hidden');
+                    loadingElement.classList.add('flex');
+                    resultsContainer.classList.add('hidden');
+
+                    try {
+                        // Submit query to API
+                        const formData = new FormData();
+                        formData.append('query', query);
+
+                        const response = await fetch('/api/query', {
+                            method: 'POST',
+                            body: formData,
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to get results');
+                        }
+
+                        const data = await response.json();
+                        displayResults(data);
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert(
+                            'Sorry, there was an error processing your request.',
+                        );
+                    } finally {
+                        // Hide loading
+                        loadingElement.classList.add('hidden');
+                        loadingElement.classList.remove('flex');
+                    }
+                });
+
+                function displayResults(data) {
+                    // Reset containers
+                    eraNavigation.innerHTML = '';
+                    artworksContainer.innerHTML = '';
+
+                    // Set narrative information
+                    narrativeTitle.textContent = data.narrative;
+
+                    // Show results container
+                    resultsContainer.classList.remove('hidden');
+
+                    const {byEra} = data.artworks;
+
+                    // Create era navigation
+                    const eras = Object.keys(byEra).sort((a, b) => {
+                        // Sort eras chronologically (approximate)
+                        const eraOrder = {
+                            'Early Christian': 1,
+                            Byzantine: 2,
+                            Medieval: 3,
+                            Renaissance: 4,
+                            Baroque: 5,
+                            Neoclassical: 6,
+                            Romantic: 7,
+                            Modern: 8,
+                            Contemporary: 9,
+                            Unknown: 10,
+                        };
+
+                        return (eraOrder[a] || 99) - (eraOrder[b] || 99);
+                    });
+
+                    // Add "jump to era" buttons
+                    eras.forEach((era) => {
+                        if (byEra[era].length > 0) {
+                            const eraButton = document.createElement('button');
+                            eraButton.className =
+                                'py-2 px-4 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-md transition-colors';
+                            eraButton.textContent = era;
+                            eraButton.addEventListener('click', () => {
+                                document
+                                    .getElementById(
+                                        `era-${era
+                                            .replace(/\s+/g, '-')
+                                            .toLowerCase()}`,
+                                    )
+                                    .scrollIntoView({
+                                        behavior: 'smooth',
+                                    });
+                            });
+                            eraNavigation.appendChild(eraButton);
+                        }
+                    });
+
+                    // Display artworks by era
+                    eras.forEach((era) => {
+                        if (byEra[era].length === 0) return;
+
+                        // Create era section
+                        const eraSection = document.createElement('section');
+                        eraSection.id = `era-${era
+                            .replace(/\s+/g, '-')
+                            .toLowerCase()}`;
+                        eraSection.className = 'mb-12 era-section';
+
+                        // Era heading
+                        const eraHeading = document.createElement('h3');
+                        eraHeading.className =
+                            'text-2xl font-serif mb-6 pb-2 border-b-2 border-blue-200';
+                        eraHeading.textContent = `${era} Period`;
+                        eraSection.appendChild(eraHeading);
+
+                        // Era description
+                        const eraDescription = document.createElement('p');
+                        eraDescription.className = 'text-gray-700 mb-6';
+                        eraDescription.textContent = getEraDescription(era);
+                        eraSection.appendChild(eraDescription);
+
+                        // Artworks container for this era
+                        const eraArtworks = document.createElement('div');
+                        eraArtworks.className =
+                            'grid grid-cols-1 md:grid-cols-2 gap-8';
+
+                        // Add artwork cards
+                        byEra[era].forEach((artwork) => {
+                            const artCard = createArtworkCard(artwork);
+                            eraArtworks.appendChild(artCard);
+                        });
+
+                        eraSection.appendChild(eraArtworks);
+                        artworksContainer.appendChild(eraSection);
+                    });
+                }
+
+                function createArtworkCard(artwork) {
+                    const card = document.createElement('div');
+                    card.className =
+                        'bg-white rounded-lg overflow-hidden shadow-lg art-card';
+
+                    // Image
+                    const imageContainer = document.createElement('div');
+                    imageContainer.className = 'h-64 overflow-hidden';
+
+                    const image = document.createElement('img');
+                    image.src = artwork.imageUrl;
+                    image.alt = artwork.title;
+                    image.className = 'w-full h-full object-cover';
+
+                    imageContainer.appendChild(image);
+                    card.appendChild(imageContainer);
+
+                    // Content
+                    const content = document.createElement('div');
+                    content.className = 'p-6';
+
+                    // Title and artist
+                    const title = document.createElement('h4');
+                    title.className = 'font-serif text-xl font-bold mb-2';
+                    title.textContent = artwork.title;
+                    content.appendChild(title);
+
+                    const artist = document.createElement('p');
+                    artist.className = 'text-gray-600 mb-4';
+                    artist.textContent = `${artwork.artist}, ${artwork.year}`;
+                    content.appendChild(artist);
+
+                    // Annotation
+                    const annotation = document.createElement('div');
+                    annotation.className = 'prose text-gray-700';
+                    annotation.innerHTML = artwork.annotation;
+                    content.appendChild(annotation);
+
+                    card.appendChild(content);
+                    return card;
+                }
+
+                function getEraDescription(era) {
+                    // Descriptions of major art historical periods
+                    const descriptions = {
+                        'Early Christian':
+                            'From the 3rd to 7th centuries, Early Christian art adapted Roman artistic traditions to serve Christian narratives, often using symbols and simplified forms.',
+                        Byzantine:
+                            'From 330 to 1453, Byzantine art featured formal, stylized religious imagery with gold backgrounds and flat, iconic figures designed to convey spiritual truths.',
+                        Medieval:
+                            'From the 5th to late 15th century, Medieval art emphasized religious devotion through illuminated manuscripts, sculpture, and stained glass in Romanesque and Gothic styles.',
+                        Renaissance:
+                            'From the 14th to 17th centuries, Renaissance art revived Classical ideals and techniques, depicting biblical stories with natural proportions, perspective, and emotional resonance.',
+                        Baroque:
+                            'From the 17th to mid-18th century, Baroque art used dramatic lighting, movement, and emotional intensity to depict biblical scenes with theatrical power and sensuality.',
+                        Neoclassical:
+                            'From the mid-18th to early 19th century, Neoclassical art returned to Classical restraint and rationality, presenting biblical narratives with formal composition and moral clarity.',
+                        Romantic:
+                            'From the late 18th to mid-19th century, Romantic art emphasized emotion, imagination, and individualism, portraying biblical scenes with drama and atmospheric effects.',
+                        Modern: 'From the late 19th to mid-20th century, Modern artists reinterpreted biblical themes through various avant-garde movements, often abstracted or conceptually reimagined.',
+                        Contemporary:
+                            'From the mid-20th century to present, Contemporary artists engage with biblical narratives through diverse media, often addressing current social and political contexts.',
+                        Unknown:
+                            'Works with uncertain dating or from periods outside major Western art historical categories.',
+                    };
+
+                    return (
+                        descriptions[era] || `Artwork from the ${era} period.`
+                    );
+                }
+            });
+
+            // Optional: WebSocket connection for real-time interactions
+            function setupWebSocket() {
+                const ws = new WebSocket(
+                    `${
+                        window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+                    }//${window.location.host}/agent`,
+                );
+
+                ws.onopen = () => {
+                    console.log('WebSocket connected');
+                };
+
+                ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    console.log('WebSocket message:', data);
+
+                    // Handle real-time updates or suggestions
+                    if (data.type === 'suggestion') {
+                        // Display suggestion to user
+                    }
+                };
+
+                ws.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                };
+
+                ws.onclose = () => {
+                    console.log('WebSocket closed');
+                    // Attempt to reconnect after a delay
+                    setTimeout(setupWebSocket, 3000);
+                };
+
+                return ws;
+            }
+
+            // Uncomment to enable WebSocket functionality
+            // const socket = setupWebSocket();
+        </script>
+    </body>
+</html>

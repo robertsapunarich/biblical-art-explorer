@@ -1,0 +1,22 @@
+{
+    "name": "biblical-art-explorer",
+    "version": "1.0.0",
+    "description": "An AI agent that helps people learn about religious art history",
+    "main": "src/index.ts",
+    "scripts": {
+      "dev": "wrangler dev",
+      "deploy": "wrangler deploy"
+    },
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+      "agents-sdk": "^0.0.0-9938444",
+      "@cloudflare/ai": "^1.0.0",
+      "@cloudflare/puppeteer": "^0.0.14"
+    },
+    "devDependencies": {
+      "typescript": "^5.0.0",
+      "wrangler": "^3.0.0",
+      "@cloudflare/workers-types": "^4.20240117.0"
+    }
+  }

@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+      "target": "ES2022",
+      "module": "ES2022",
+      "lib": ["ES2022", "DOM"],
+      "jsx": "react",
+      "moduleResolution": "node",
+      "esModuleInterop": true,
+      "allowSyntheticDefaultImports": true,
+      "resolveJsonModule": true,
+      "strict": true,
+      "outDir": "dist",
+      "types": ["@cloudflare/workers-types"],
+      "skipLibCheck": true,
+      "noEmit": true,
+      "forceConsistentCasingInFileNames": true,
+      "isolatedModules": true
+    },
+    "include": ["src/**/*.ts", "src/**/*.tsx"],
+    "exclude": ["node_modules", "dist"]
+  }
