@@ -1,8 +1,8 @@
 // src/index.ts
-import { Agent, routeAgentRequest } from 'agents-sdk';
+import { Agent, AgentNamespace, getAgentByName } from 'agents-sdk';
 
 import { Ai } from '@cloudflare/ai';
-import puppeteer, { Browser, BrowserWorker } from '@cloudflare/puppeteer';
+import puppeteer, { BrowserWorker } from '@cloudflare/puppeteer';
 
 // Define the agent's state structure
 interface ArtHistoryState {
@@ -24,7 +24,7 @@ interface Artwork {
 // Define environment bindings
 interface Env {
     // Agent namespace
-    ART_HISTORY_AGENT: ArtHistoryAgent;
+    ART_HISTORY_AGENT: AgentNamespace<ArtHistoryAgent>;
 
     // AI capabilities
     AI: Ai;
@@ -37,24 +37,15 @@ interface Env {
 }
 
 export class ArtHistoryAgent extends Agent<Env, ArtHistoryState> {
-    // Initialize with empty state
-    constructor(state: any, env: any) {
-        super(state, env);
-
-        // Initialize state if it doesn't exist
-        if (!this.state) {
-            this.setState({
-                recentQueries: [],
-                userInteractions: 0,
-                popularQueries: {},
-            });
-        }
+    async onStart() {
+        console.log('Agent started');
     }
 
     // Handle HTTP requests
     async onRequest(request: Request): Promise<Response> {
         const url = new URL(request.url);
 
+        console.log('request received');
         // Route to frontend assets if not targeting the API
         if (!url.pathname.startsWith('/api/')) {
             return this.env.ASSETS.fetch(request);
@@ -520,11 +511,17 @@ export default {
         env: Env,
         ctx: ExecutionContext,
     ): Promise<Response> {
-        // Route requests to the appropriate agent
-        return (
-            (await routeAgentRequest(request, env)) ||
-            // If no agent route matches, return a 404
-            Response.json({error: 'Not found'}, {status: 404})
+        // Durable Objects-style addressing
+        // Best for: controlling ID generation, associating IDs with your existing systems,
+        // and customizing when/how an Agent is created or invoked
+        const id = env.ART_HISTORY_AGENT.newUniqueId();
+        const agent = env.ART_HISTORY_AGENT.get(id);
+        // Pass the incoming request straight to your Agent
+        let resp = await agent.fetch(request);
+
+        return Response.json(
+            {error: 'Welcome to Biblical Art Explorer'},
+            {status: 200},
         );
     },
 };

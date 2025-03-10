@@ -335,7 +335,7 @@
                 const ws = new WebSocket(
                     `${
                         window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-                    }//${window.location.host}/agent`,
+                    }//${window.location.host}`,
                 );
 
                 ws.onopen = () => {
@@ -366,7 +366,7 @@
             }
 
             // Uncomment to enable WebSocket functionality
-            // const socket = setupWebSocket();
+            const socket = setupWebSocket();
         </script>
     </body>
 </html>

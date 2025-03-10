@@ -33,11 +33,9 @@
     },
 
     // Browser Rendering API
-    "browser": [
-      {
-        "binding": "BROWSER"
-      }
-    ],
+    "browser":{
+      "binding": "BROWSER"
+    },
 
     // Static assets for frontend
     "assets": {
