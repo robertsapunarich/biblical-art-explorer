@@ -14,5 +14,13 @@
     "assets": {
       "directory": "./public",
       "binding": "ASSETS"
-    }
+    },
+
+    // Migrations to delete unused Durable Object classes
+    "migrations": [
+      {
+        "tag": "v1",
+        "deleted_classes": ["ArtHistoryAgent"]
+      }
+    ]
   }
