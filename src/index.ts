@@ -519,6 +519,7 @@ export default {
         // Pass the incoming request straight to your Agent
         let resp = await agent.fetch(request);
 
+        console.log('Welcome to Biblical Art Explorer');
         return Response.json(
             {error: 'Welcome to Biblical Art Explorer'},
             {status: 200},
