@@ -9,15 +9,6 @@
       "head_sampling_rate": 1
     },
 
-    // AI for processing
-    "ai": {
-      "binding": "AI"
-    },
-
-    // Browser Rendering API
-    "browser":{
-      "binding": "BROWSER"
-    },
 
     // Static assets for frontend
     "assets": {
