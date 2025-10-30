@@ -15,6 +15,7 @@ export default {
     ): Promise<Response> {
         // Just serve the static UI
         console.log("welcome to biblical art explorer")
+        console.log("rowan williams has funny eyebrows")
         return env.ASSETS.fetch(request);
     },
 };
