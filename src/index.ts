@@ -14,6 +14,7 @@ export default {
         ctx: ExecutionContext,
     ): Promise<Response> {
         // Just serve the static UI
+        console.log("welcome to biblical art explorer")
         return env.ASSETS.fetch(request);
     },
 };
