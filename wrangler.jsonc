@@ -19,7 +19,7 @@
     // Migrations to delete unused Durable Object classes
     "migrations": [
       {
-        "tag": "v1",
+        "tag": "v2",
         "deleted_classes": ["ArtHistoryAgent"]
       }
     ]
